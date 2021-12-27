@@ -11,6 +11,6 @@ router
     .route('/')
     .post(authorizeUser, isExistentUser, create)
     .put(authorizeUser, isExistentUser, editUser)
-    .delete(authorizeUser, isExistentUser, deleteUser)
+    .delete(authorizeUser, isExistentUser, deleteUser) //SHOULD TEST AGAIN WHEN FRONT-END IS DONE
 
 export default router

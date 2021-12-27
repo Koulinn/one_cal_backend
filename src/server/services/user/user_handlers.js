@@ -70,9 +70,21 @@ const editUser = async (req, res, next) => {
 
 const deleteUser = async (req, res, next) => {
     try {
-        const { email, uid } = req.user
+        const { uid } = req.user
+        const query = `DELETE FROM users WHERE uid='${uid}'`
+
+        const DB_response = await read_query(query)
+
+        const isDeleted = DB_response[1].rowCount
+
+        if (isDeleted) {
+            res.status(203).send({ msg: `User with ID ${uid} was successfully deleted from the database` })
+        } else {
+            res.status(400).send({ msg: `User not deleted`, success: false })
+        }
     } catch (error) {
         console.log(error)
+        res.status(500).send({ msg: 'Server error' })
     }
 }
 
