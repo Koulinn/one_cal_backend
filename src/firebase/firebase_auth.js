@@ -13,6 +13,7 @@ const authorizeUser = async (req, res, next) => {
 
     try {
         const decodedToken = await auth.verifyIdToken(token)
+        req.user = {}
         req.user.uid = decodedToken.user_id
         req.user.email = decodedToken.email
 
