@@ -53,8 +53,6 @@ const userValidation = (req, res, next) => {
     if (isValid === checked) {
         next()
     } else {
-        // const lastComa = missingProperties.lastIndexOf(',')
-        // const msg = missingProperties.slice(0, lastComa) + '.'
         const msg = errorMsgOnValidation(missingPropertiesText)
 
         res.status(400).send({ msg })
