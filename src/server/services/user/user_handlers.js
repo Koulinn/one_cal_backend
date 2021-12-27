@@ -3,12 +3,12 @@ import lib from '../../../library/index.js'
 
 const { read_query } = user_queries
 const {
-    aux: { errorMsgOnValidation },
+    aux: {},
 } = lib
 
 const create = async (req, res, next) => {
     try {
-        const { email, uid } = req.body
+        const { email, uid } = req.user
         const query = 'INSERT INTO users(email, uid) VALUES($1, $2) RETURNING email, uid'
         const values = [email, uid]
 
@@ -24,7 +24,7 @@ const create = async (req, res, next) => {
 
 const isExistentUser = async (req, res, next) => {
     try {
-        const { email, uid } = req.body
+        const { email, uid } = req.user
         const query = 'SELECT email, uid FROM users WHERE email = $1 OR uid = $2'
         const values = [email, uid]
 
@@ -41,33 +41,9 @@ const isExistentUser = async (req, res, next) => {
     }
 }
 
-const userValidation = (req, res, next) => {
-    const expectedProperties = ['email', 'uid']
-    let checked = 0
-    const isValid = 2
-    let missingPropertiesText = `The properties are missing`
-
-    expectedProperties.forEach((property) => {
-        if (req.body[property] !== undefined) {
-            checked++
-        } else {
-            missingPropertiesText += ` ${property},`
-        }
-    })
-
-    if (isValid === checked) {
-        next()
-    } else {
-        const msg = errorMsgOnValidation(missingPropertiesText)
-
-        res.status(400).send({ msg })
-    }
-}
-
 const userHandlers = {
     create,
     isExistentUser,
-    userValidation,
 }
 
 export default userHandlers
