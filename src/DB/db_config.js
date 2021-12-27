@@ -1,17 +1,22 @@
-import pkg from 'pg'
 import config from '../config/index.js'
-const { Client } = pkg
+import { Sequelize } from 'sequelize'
 
 const {
     globalVariables: { APP_MODE },
 } = config
 
+const { PGUSER, PGHOST, PGPASSWORD, PGPORT } = process.env
+
 export const database = APP_MODE === 'development' ? 'one_cal_dev' : 'one_cal'
 
 const db_config = {
     database: database,
+    username: PGUSER,
+    password: PGPASSWORD,
+    host: PGHOST,
+    port: PGPORT,
+    dialect: 'postgres',
 }
+export const sequelize = new Sequelize(db_config)
 
-const client = new Client(db_config)
-
-export default client
+export default sequelize
