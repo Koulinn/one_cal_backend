@@ -1,7 +1,7 @@
 import user_queries from '../../../DB/Entities/user/query_handler.js'
 import lib from '../../../library/index.js'
 
-const { insert_user, check_existent_user } = user_queries
+const { read_query } = user_queries
 const {
     aux: { errorMsgOnValidation },
 } = lib
@@ -9,8 +9,10 @@ const {
 const create = async (req, res, next) => {
     try {
         const { email, uid } = req.body
+        const query = 'INSERT INTO users(email, uid) VALUES($1, $2) RETURNING email, uid'
+        const values = [email, uid]
 
-        const DB_response = await insert_user(email, uid)
+        const DB_response = await read_query(query, values)
         const newUser = DB_response.rows[0]
 
         res.status(201).send(newUser)
@@ -23,7 +25,10 @@ const create = async (req, res, next) => {
 const isExistentUser = async (req, res, next) => {
     try {
         const { email, uid } = req.body
-        const DB_res = await check_existent_user(email, uid)
+        const query = 'SELECT email, uid FROM users WHERE email = $1 OR uid = $2'
+        const values = [email, uid]
+
+        const DB_res = await read_query(query, values)
         const isExistentUser = DB_res.rowCount
 
         if (isExistentUser) {
