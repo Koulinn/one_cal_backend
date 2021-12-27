@@ -9,13 +9,15 @@ const {
 const create = async (req, res, next) => {
     try {
         const { email, uid } = req.user
-        const query = 'INSERT INTO users(email, uid) VALUES($1, $2) RETURNING email, uid'
-        const values = [email, uid]
+        const query = `INSERT INTO users(email, uid) VALUES('${email}','${uid}')`
 
-        const DB_response = await read_query(query, values)
-        const newUser = DB_response.rows[0]
+        const DB_response = await read_query(query)
 
-        res.status(201).send(newUser)
+        if (DB_response) {
+            res.status(201).send({ success: true })
+        } else {
+            res.status(404).send({ success: false })
+        }
     } catch (error) {
         console.log(error)
         res.status(500).send({ msg: 'Server error' })
@@ -25,10 +27,9 @@ const create = async (req, res, next) => {
 const isExistentUser = async (req, res, next) => {
     try {
         const { email, uid } = req.user
-        const query = 'SELECT email, uid FROM users WHERE email = $1 OR uid = $2'
-        const values = [email, uid]
+        const query = `SELECT email, uid FROM users WHERE email='${email}' OR uid='${uid}'`
 
-        const DB_res = await read_query(query, values)
+        const DB_res = await read_query(query)
         const isExistentUser = DB_res.rowCount
 
         if (isExistentUser) {
@@ -41,9 +42,45 @@ const isExistentUser = async (req, res, next) => {
     }
 }
 
+const editUser = async (req, res, next) => {
+    try {
+        const { email, uid } = req.user
+        const { name, surname, birth_date } = req.body
+
+        const query = `
+            UPDATE users
+            SET email='${email}', name='${name}', surname='${surname}', birth_date='${birth_date}'
+            WHERE uid='Cx6LLYDqMJcDk0lH21aN7hIdN9m2'
+            RETURNING name, surname, birth_date
+        `
+
+        const DB_response = await read_query(query)
+        const updatedUser = DB_response[0][0]
+
+        if (updatedUser) {
+            res.status(200).send(updatedUser)
+        } else {
+            res.status(404).send({ msg: 'Not updated' })
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({ msg: 'Server error' })
+    }
+}
+
+const deleteUser = async (req, res, next) => {
+    try {
+        const { email, uid } = req.user
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 const userHandlers = {
     create,
     isExistentUser,
+    editUser,
+    deleteUser,
 }
 
 export default userHandlers
