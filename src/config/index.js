@@ -1,7 +1,7 @@
 import globalVariables from './globalVariables/index.js'
 
 const config = {
-  globalVariables,
+    globalVariables,
 }
 
 export default config
