@@ -49,7 +49,7 @@ const add_meal_to_user = async (req, res, next) => {
         // const { uid } = req.user
         const { time_eaten } = req.body
         const uid = '6PB7ZlwtHwatBs15OEWBq5fIKux2'
-        const query = `INSERT INTO user_meal(user_id, meal_id, time_eaten) VALUES('${uid}','${meal_id}', '${time_eaten}) RETURNING meal_id, time_eaten`
+        const query = `INSERT INTO user_meal(user_id, meal_id, time_eaten) VALUES('${uid}','${meal_id}', '${time_eaten}') RETURNING meal_id, time_eaten, user_meal_id`
 
         const DB_res = await read_query(query)
         const is_meal_added = DB_res[1] === 1
@@ -98,7 +98,7 @@ const delete_meal = async (req, res, next) => {
 const delete_meal_eaten = async (req, res, next) => {
     try {
         const { user_meal_id } = req.params
-        const query = `DELETE FROM user_meal WHERE _id='${user_meal_id}'`
+        const query = `DELETE FROM user_meal WHERE user_meal_id='${user_meal_id}'`
 
         const DB_response = await read_query(query)
 
@@ -148,12 +148,7 @@ const edit_meal_eaten = async (req, res, next) => {
         const { user_meal_id } = req.params
         const { time_eaten } = req.body
 
-        const query = `
-            UPDATE user_meal
-            SET time_eaten='${time_eaten}',
-            WHERE user_meal_id='${user_meal_id}'
-            RETURNING *
-        `
+        const query = `UPDATE user_meal SET time_eaten='${time_eaten}' WHERE user_meal_id='${user_meal_id}' RETURNING *`
 
         const DB_response = await read_query(query)
         const updatedMeal = DB_response[0][0]
