@@ -6,7 +6,7 @@ const {
 
 const create = async (req, res, next) => {
     try {
-        const { name, calories, isAddToUserDiet } = req.body
+        const { name, calories } = req.body
         const query = `INSERT INTO meal(name, calories) VALUES('${name}','${calories}') RETURNING *`
 
         const DB_res = await read_query(query)
@@ -46,9 +46,9 @@ const checkExistentMealOrCreate = async (req, res, next) => {
 const add_meal_to_user = async (req, res, next) => {
     try {
         const meal_id = req.added_meal_id
-        // const { uid } = req.user
+        const { uid } = req.user
         const { time_eaten } = req.body
-        const uid = '6PB7ZlwtHwatBs15OEWBq5fIKux2'
+
         const query = `INSERT INTO user_meal(user_id, meal_id, time_eaten) VALUES('${uid}','${meal_id}', '${time_eaten}') RETURNING meal_id, time_eaten, user_meal_id`
 
         const DB_res = await read_query(query)
