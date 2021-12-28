@@ -1,9 +1,7 @@
-import user_queries from '../../../DB/Entities/user/query_handler.js'
 import lib from '../../../library/index.js'
 
-const { read_query } = user_queries
 const {
-    aux: {},
+    aux: { read_query },
 } = lib
 
 const create = async (req, res, next) => {
@@ -30,7 +28,7 @@ const isExistentUser = async (req, res, next) => {
         const query = `SELECT email, uid FROM users WHERE email='${email}' OR uid='${uid}'`
 
         const DB_res = await read_query(query)
-        const isExistentUser = DB_res.rowCount
+        const isExistentUser = DB_res[1].rowCount
 
         if (isExistentUser) {
             res.status(400).send({ msg: 'E-mail already registered', email })
@@ -50,7 +48,7 @@ const editUser = async (req, res, next) => {
         const query = `
             UPDATE users
             SET email='${email}', name='${name}', surname='${surname}', birth_date='${birth_date}'
-            WHERE uid='Cx6LLYDqMJcDk0lH21aN7hIdN9m2'
+            WHERE uid='${uid}'
             RETURNING name, surname, birth_date
         `
 
