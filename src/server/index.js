@@ -3,6 +3,7 @@ import cors from 'cors'
 import config from '../config/index.js'
 import '../DB/index.js'
 import userRoutes from './services/user/index.js'
+import mealRoutes from './services/meal/index.js'
 
 const {
     globalVariables: { PORT },
@@ -14,6 +15,7 @@ server.use(cors())
 server.use(express.json())
 
 server.use('/user', userRoutes)
+server.use('/meal', mealRoutes)
 
 server.listen(PORT, () => console.log('Server listening on ' + PORT))
 server.on('error', (error) => console.log('Server crashed due ' + error))
