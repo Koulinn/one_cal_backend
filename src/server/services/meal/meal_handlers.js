@@ -47,8 +47,9 @@ const add_meal_to_user = async (req, res, next) => {
     try {
         const meal_id = req.added_meal_id
         // const { uid } = req.user
+        const { time_eaten } = req.body
         const uid = '6PB7ZlwtHwatBs15OEWBq5fIKux2'
-        const query = `INSERT INTO user_meal(user_id, meal_id) VALUES('${uid}','${meal_id}') RETURNING meal_id, updated_at`
+        const query = `INSERT INTO user_meal(user_id, meal_id, time_eaten) VALUES('${uid}','${meal_id}', '${time_eaten}) RETURNING meal_id, time_eaten`
 
         const DB_res = await read_query(query)
         const is_meal_added = DB_res[1] === 1
@@ -94,6 +95,28 @@ const delete_meal = async (req, res, next) => {
     }
 }
 
+const delete_meal_eaten = async (req, res, next) => {
+    try {
+        const { user_meal_id } = req.params
+        const query = `DELETE FROM user_meal WHERE _id='${user_meal_id}'`
+
+        const DB_response = await read_query(query)
+
+        const isDeleted = DB_response[1].rowCount
+
+        if (isDeleted) {
+            res.status(203).send({
+                msg: `Meal eaten with ID ${user_meal_id} was successfully deleted from the database`,
+            })
+        } else {
+            res.status(400).send({ msg: `Meal eaten not deleted`, success: false })
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({ msg: 'Server error' })
+    }
+}
+
 const edit_meal = async (req, res, next) => {
     try {
         const { _id } = req.params
@@ -120,12 +143,40 @@ const edit_meal = async (req, res, next) => {
     }
 }
 
+const edit_meal_eaten = async (req, res, next) => {
+    try {
+        const { user_meal_id } = req.params
+        const { time_eaten } = req.body
+
+        const query = `
+            UPDATE user_meal
+            SET time_eaten='${time_eaten}',
+            WHERE user_meal_id='${user_meal_id}'
+            RETURNING *
+        `
+
+        const DB_response = await read_query(query)
+        const updatedMeal = DB_response[0][0]
+
+        if (updatedMeal) {
+            res.status(200).send(updatedMeal)
+        } else {
+            res.status(404).send({ msg: 'Not updated' })
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({ msg: 'Server error' })
+    }
+}
+
 const meal_handlers = {
     add_meal_to_user,
     checkExistentMealOrCreate,
     get_meal,
     edit_meal,
     delete_meal,
+    edit_meal_eaten,
+    delete_meal_eaten,
 }
 
 export default meal_handlers
