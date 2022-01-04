@@ -7,11 +7,11 @@ const authorizeUser = async (req, res, next) => {
 
     if (!authorizationHeader) {
         res.status(404).send({ msg: 'Missing token' })
+        return
     }
 
-    const token = authorizationHeader.split(' ')[1]
-
     try {
+        const token = authorizationHeader.split(' ')[1]
         const decodedToken = await auth.verifyIdToken(token)
         req.user = {}
         req.user.uid = decodedToken.user_id
