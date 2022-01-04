@@ -10,6 +10,7 @@ const {
     edit_meal,
     edit_meal_eaten,
     delete_meal_eaten,
+    get_user_meal_data,
 } = meal_handlers
 
 const router = express.Router()
@@ -17,7 +18,7 @@ const router = express.Router()
 router
     .route('/')
     .post(authorizeUser, checkExistentMealOrCreate, add_meal_to_user)
-    .get()
+    .get(authorizeUser, get_user_meal_data)
 
 router
     .route('/meal_eaten/:user_meal_id')
