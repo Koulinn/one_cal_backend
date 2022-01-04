@@ -30,6 +30,7 @@ const checkExistentMealOrCreate = async (req, res, next) => {
         const query = `SELECT name, _id FROM meal WHERE name='${name}'`
 
         const DB_res = await read_query(query)
+        console.log(DB_res)
         const isExistentMeal = DB_res[1].rowCount
 
         if (isExistentMeal) {
@@ -85,7 +86,9 @@ const delete_meal = async (req, res, next) => {
         const isDeleted = DB_response[1].rowCount
 
         if (isDeleted) {
-            res.status(203).send({ msg: `Meal with ID ${_id} was successfully deleted from the database` })
+            res.status(203).send({
+                msg: `Meal with ID ${_id} was successfully deleted from the database`,
+            })
         } else {
             res.status(400).send({ msg: `Meal not deleted`, success: false })
         }
@@ -109,7 +112,10 @@ const delete_meal_eaten = async (req, res, next) => {
                 msg: `Meal eaten with ID ${user_meal_id} was successfully deleted from the database`,
             })
         } else {
-            res.status(400).send({ msg: `Meal eaten not deleted`, success: false })
+            res.status(400).send({
+                msg: `Meal eaten not deleted`,
+                success: false,
+            })
         }
     } catch (error) {
         console.log(error)
@@ -164,6 +170,44 @@ const edit_meal_eaten = async (req, res, next) => {
     }
 }
 
+const get_user_meal_data = async (req, res, next) => {
+    try {
+        const { uid } = req.user
+
+        // Get all the food history
+        // SELECT * FROM user_meal INNER JOIN meal ON (user_meal.meal_id = meal._id) WHERE user_meal.user_id ='ksQlDZVWM2fJlcbFEbAadzfiVRP2';
+
+        const getAllMealsFromToday = `SELECT time_eaten, name, calories FROM user_meal INNER JOIN meal ON (user_meal.meal_id = meal._id) WHERE (user_meal.user_id ='${uid}') AND (user_meal.time_eaten::TIMESTAMP::DATE = CURRENT_DATE);`
+
+        const getCaloriesSumYesterday = `SELECT SUM (meal.calories) AS calorie_total_yesterday FROM user_meal INNER JOIN meal ON (user_meal.meal_id = meal._id) WHERE (user_meal.user_id ='${uid}') AND (user_meal.time_eaten::TIMESTAMP::DATE =CURRENT_DATE - INTEGER '1');`
+        const getCaloriesSumToday = `SELECT SUM (meal.calories) AS calorie_total_today FROM user_meal INNER JOIN meal ON (user_meal.meal_id = meal._id) WHERE (user_meal.user_id ='${uid}') AND (user_meal.time_eaten::TIMESTAMP::DATE =CURRENT_DATE);`
+
+        const promisesList = [
+            read_query(getCaloriesSumToday),
+            read_query(getCaloriesSumYesterday),
+            read_query(getAllMealsFromToday),
+        ]
+
+        const DB_response = await Promise.all(promisesList)
+
+        const [{ calorie_total_today }] = DB_response[0][0]
+        const [{ calorie_total_yesterday }] = DB_response[1][0]
+        const mealsFromToday = DB_response[2][0]
+
+        const response = {
+            success: true,
+            calorie_total_today,
+            calorie_total_yesterday,
+            mealsFromToday,
+        }
+
+        res.status(200).send(response)
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({ msg: 'Server error' })
+    }
+}
+
 const meal_handlers = {
     add_meal_to_user,
     checkExistentMealOrCreate,
@@ -172,6 +216,7 @@ const meal_handlers = {
     delete_meal,
     edit_meal_eaten,
     delete_meal_eaten,
+    get_user_meal_data,
 }
 
 export default meal_handlers
