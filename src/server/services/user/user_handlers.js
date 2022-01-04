@@ -22,6 +22,26 @@ const create = async (req, res, next) => {
     }
 }
 
+const login = async (req, res, next) => {
+    try {
+        const { email, uid } = req.user
+        const query = `SELECT name, surname, birth_date, email FROM users WHERE email='${email}' OR uid='${uid}'`
+
+        const DB_response = await read_query(query)
+
+        const user = DB_response[0][0]
+
+        if (user) {
+            res.status(200).send({ success: true, user })
+        } else {
+            res.status(404).send({ success: false, msg: 'User not found' })
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({ msg: 'Server error' })
+    }
+}
+
 const isExistentUser = async (req, res, next) => {
     try {
         const { email, uid } = req.user
@@ -76,7 +96,9 @@ const deleteUser = async (req, res, next) => {
         const isDeleted = DB_response[1].rowCount
 
         if (isDeleted) {
-            res.status(203).send({ msg: `User with ID ${uid} was successfully deleted from the database` })
+            res.status(203).send({
+                msg: `User with ID ${uid} was successfully deleted from the database`,
+            })
         } else {
             res.status(400).send({ msg: `User not deleted`, success: false })
         }
@@ -91,6 +113,7 @@ const userHandlers = {
     isExistentUser,
     editUser,
     deleteUser,
+    login,
 }
 
 export default userHandlers
