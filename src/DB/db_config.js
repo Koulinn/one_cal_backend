@@ -11,17 +11,23 @@ const database = APP_MODE === 'development' ? 'one_cal_dev' : 'Prod_DB'
 
 console.log(database, '<<<<<<<database connected')
 
-const db_config_DEV_MODE = {
-    database: database,
-    username: PGUSER,
-    password: PGPASSWORD,
-    host: PGHOST,
-    port: PGPORT,
-    dialect: 'postgres',
+const DEV_URI = `postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${database}`
+
+const DB_URI_STRING = APP_MODE === 'production' ? DATABASE_URL : DEV_URI
+
+const db_config_options_DEV = {}
+const db_config_options_PROD = {
+    dialectOptions: {
+        ssl: {
+            require: true,
+            rejectUnauthorized: false,
+        },
+    },
 }
 
-const db_config = APP_MODE === 'production' ? DATABASE_URL : db_config_DEV_MODE
+const DB_CONFIG_OPTIONS =
+    APP_MODE === 'production' ? db_config_options_PROD : db_config_options_DEV
 
-export const sequelize = new Sequelize(db_config)
+export const sequelize = new Sequelize(DB_URI_STRING, DB_CONFIG_OPTIONS)
 
 export default sequelize
