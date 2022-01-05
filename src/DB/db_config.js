@@ -5,13 +5,13 @@ const {
     globalVariables: { APP_MODE },
 } = config
 
-const { PGUSER, PGHOST, PGPASSWORD, PGPORT } = process.env
+const { PGUSER, PGHOST, PGPASSWORD, PGPORT, DATABASE_URL } = process.env
 
-export const database = APP_MODE === 'development' ? 'one_cal_dev' : 'one_cal'
+const database = APP_MODE === 'development' ? 'one_cal_dev' : 'Prod_DB'
 
 console.log(database, '<<<<<<<database connected')
 
-const db_config = {
+const db_config_DEV_MODE = {
     database: database,
     username: PGUSER,
     password: PGPASSWORD,
@@ -19,6 +19,9 @@ const db_config = {
     port: PGPORT,
     dialect: 'postgres',
 }
+
+const db_config = APP_MODE === 'production' ? DATABASE_URL : db_config_DEV_MODE
+
 export const sequelize = new Sequelize(db_config)
 
 export default sequelize
