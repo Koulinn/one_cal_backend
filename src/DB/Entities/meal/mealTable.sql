@@ -5,3 +5,8 @@ CREATE TABLE IF NOT EXISTS meal(
     CONSTRAINT meal_PK PRIMARY KEY (_id),
     CONSTRAINT unique_name UNIQUE (name)
 );
+
+ALTER TABLE
+    meal
+ADD
+    CONSTRAINT positive_calories CHECK (calories > 0);
