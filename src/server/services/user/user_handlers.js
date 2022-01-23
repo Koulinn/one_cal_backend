@@ -1,4 +1,7 @@
 import lib from '../../../library/index.js'
+import fireStorage from '../../../firebase/firebase_storage.js'
+
+const { uploadFile } = fireStorage
 
 const {
     aux: { read_query },
@@ -25,7 +28,7 @@ const create = async (req, res, next) => {
 const login = async (req, res, next) => {
     try {
         const { email, uid } = req.user
-        const query = `SELECT name, surname, birth_date, email FROM users WHERE email='${email}' OR uid='${uid}'`
+        const query = `SELECT name, surname, birth_date, avatar, email FROM users WHERE email='${email}' OR uid='${uid}'`
 
         const DB_response = await read_query(query)
 
@@ -108,12 +111,27 @@ const deleteUser = async (req, res, next) => {
     }
 }
 
+const uploadAvatar = async (req, res, next) => {
+    try {
+        const file = req.file
+        const { uid } = req.user
+
+        const res_upload = await uploadFile(file.buffer, uid)
+        console.log(res_upload)
+        res.status(200).send(res_upload)
+    } catch (error) {
+        console.log(error)
+        next()
+    }
+}
+
 const userHandlers = {
     create,
     isExistentUser,
     editUser,
     deleteUser,
     login,
+    uploadAvatar,
 }
 
 export default userHandlers
