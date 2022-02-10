@@ -116,9 +116,25 @@ const uploadAvatar = async (req, res, next) => {
         const file = req.file
         const { uid } = req.user
 
-        const res_upload = await uploadFile(file.buffer, uid)
-        console.log(res_upload)
-        res.status(200).send(res_upload)
+        const extension = file.originalname.split('.')[1]
+
+        const res_upload = await uploadFile(file.buffer, uid + '.' + extension)
+
+        const query = `
+            UPDATE users
+            SET avatar='${res_upload}'
+            WHERE uid='${uid}'
+            RETURNING avatar
+        `
+
+        const DB_response = await read_query(query)
+        const updatedUser = DB_response[0][0]
+
+        if (updatedUser) {
+            res.status(200).send(updatedUser)
+        } else {
+            res.status(404).send({ msg: 'Not updated' })
+        }
     } catch (error) {
         console.log(error)
         next()
